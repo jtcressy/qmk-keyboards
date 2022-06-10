@@ -35,7 +35,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup
-        run: sudo make deps
+        run: make deps
 
       - name: Generate keymap.c from keymap.json if it exists
         run: |
