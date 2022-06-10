@@ -21,9 +21,9 @@ qmk-submodules:
 
 qmk-cli:
 	curl -s https://linux.qmk.fm/gpg_pubkey.txt | sudo apt-key add -
-	add-apt-repository 'deb https://linux.qmk.fm/ focal main'
-	apt update -yqq
-	apt install -yqq qmk
+	sudo add-apt-repository 'deb https://linux.qmk.fm/ focal main'
+	sudo apt update -yqq
+	sudo apt install -yqq qmk
 
 deps: qmk-cli clone-qmk qmk-deps fix-gcc-ubuntu
 
