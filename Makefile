@@ -25,5 +25,5 @@ qmk-cli:
 	sudo apt update -yqq
 	sudo apt install -yqq qmk
 
-deps: qmk-cli clone-qmk qmk-deps fix-gcc-ubuntu
+deps: fix-gcc-ubuntu qmk-cli clone-qmk qmk-deps
 
