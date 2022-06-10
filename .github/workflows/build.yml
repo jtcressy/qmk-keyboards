@@ -1,31 +1,73 @@
 name: Build Firmware
 
-on: [push]
+on:
+  push:
 
 jobs:
+  keyboard-discovery:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup
+      run: sudo apt install moreutils
+    - id: set-matrix
+      run: |
+        echo '{"include":[]}' > matrix.json
+
+        for keyboard in $(find keyboards | grep '^keyboards/.*/keymaps$' | sed 's=keyboards/==g' | sed 's=/keymaps==g')
+        do
+          export keyboard
+          for keymap in $(find keyboards/$keyboard/keymaps | grep '^keyboards/.*/keymaps/[^\/]*$' | sed 's=keyboards/.*/keymaps/==g')
+          do
+            export keymap
+            jq -r '.include += [{"keyboard": env.keyboard, "keymap": env.keymap}]' matrix.json | sponge matrix.json
+          done
+        done
+        echo "::set-output name=matrix::$(jq -r tostring matrix.json)"
+
   build:
+    needs: keyboard-discovery
+    strategy:
+      matrix: ${{ fromJson(needs.keyboard-discovery.outputs.matrix) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Clone qmk_firmware
-        run: git clone https://github.com/qmk/qmk_firmware.git
-      - name: Install qmk deps
-        run: cd qmk_firmware && ./util/qmk_install.sh && python3 -m pip install qmk
-      - name: fix gcc
-        run: sudo bash .github/scripts/update-gcc10-ubuntu.sh
-      - name: Install git submodules
-        run: cd qmk_firmware && make git-submodule
-        
+      - name: Setup
+        run: sudo make deps
+
+      - name: Generate keymap.c from keymap.json if it exists
+        run: |
+          function generate_keymap_c {
+            qmk json2c -o keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}/keymap.c keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}/keymap.json
+          }
+          (test -f keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}/keymap.json && echo keymap.json exists && generate_keymap_c) || echo keymap.json does not exist, skipping step
+
+      - name: Copy keyboard keymap
+        run: sudo cp -rp keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }} qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps
+
       - name: Compile firmware
-        run: cd qmk_firmware && make gmmk/pro/rev1/ansi:via
+        run: cd qmk_firmware && make ${{ matrix.keyboard }}:${{ matrix.keymap }}
+
       - name: Upload compiled firmware (build artifact)
         uses: actions/upload-artifact@v2
         with:
-          name: GMMK Pro QMK Firmware
-          path: qmk_firmware/gmmk_pro_rev1_ansi_via.bin
+          name: firmware
+          path: qmk_firmware/*.bin
+  publish:
+    runs-on: ubuntu-latest
+    needs:
+    - build
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: firmware
+      - run: ls -lah
       - name: Upload compiled firmware (tagged release)
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            qmk_firmware/gmmk_pro_rev1_ansi_via.bin
+            qmk_firmware/*.bin
