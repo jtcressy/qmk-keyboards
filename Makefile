@@ -2,8 +2,8 @@ SHELL := /usr/bin/env bash
 
 QMK_DIR := qmk_firmware
 
-clone-qmk:
-	git clone https://github.com/qmk/qmk_firmware.git $(QMK_DIR)
+clone-qmk: 
+	qmk clone qmk/qmk_firmware $(QMK_DIR)
 
 qmk-deps:
 	pushd $(QMK_DIR) && \
@@ -12,7 +12,7 @@ qmk-deps:
 	popd
 
 fix-gcc-ubuntu:
-	bash .github/scripts/update-gcc10-ubuntu.sh
+	sudo bash .github/scripts/update-gcc10-ubuntu.sh
 
 qmk-submodules:
 	pushd $(QMK_DIR) && \
