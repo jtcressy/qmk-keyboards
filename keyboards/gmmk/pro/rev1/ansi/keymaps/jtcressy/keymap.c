@@ -52,7 +52,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
   // This is an alternative togglable layer to change default function row to standard F keys
   [3] = LAYOUT(
-    _______, KC_BRID, KC_BRIU, KC_MSCTRL,  KC_LNPD, RGB_VAD, RGB_VAI, KC_F7,   KC_F8,   KC_MRWD, KC_MPLY, KC_MFFD, KC_F12,           _______,
+    _______, KC_BRID, KC_BRIU, KC_MSCTRL,  KC_LNPD, RGB_VAD, RGB_VAI, KC_F7,   KC_F8,   KC_MRWD, KC_MPLY, KC_MFFD, KC_F12,  _______,          _______,
     _______, _______, _______, _______,    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,
     _______, _______, _______, _______,    _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,          _______,
     _______, _______, _______, _______,    _______, _______, _______, _______, _______, _______, _______, _______,          _______,          _______,
