@@ -27,3 +27,9 @@ qmk-cli:
 
 deps: fix-gcc-ubuntu qmk-cli clone-qmk qmk-deps
 
+release:
+	$(eval TAG := $(shell date +%Y%m%d-%H%M))
+	@echo pushing tag $(TAG) for release using main:
+	git show main
+	git tag $(TAG) main
+	git push --atomic origin main $(TAG)
