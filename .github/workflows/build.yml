@@ -34,29 +34,41 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Setup
-        run: make deps
+      # - name: Setup
+      #   run: make deps
 
-      - name: Generate keymap.c from keymap.json if it exists
-        run: |
-          function generate_keymap_c {
-            qmk json2c -o keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}/keymap.c keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}/keymap.json
-          }
-          (test -f keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}/keymap.json && echo keymap.json exists && generate_keymap_c) || echo keymap.json does not exist, skipping step
+      # - name: Generate keymap.c from keymap.json if it exists
+      #   run: |
+      #     function generate_keymap_c {
+      #       qmk json2c -o keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}/keymap.c keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}/keymap.json
+      #     }
+      #     (test -f keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}/keymap.json && echo keymap.json exists && generate_keymap_c) || echo keymap.json does not exist, skipping step
 
-      - name: Copy keyboard keymap
-        run: sudo cp -rp keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }} qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps
+      # - name: Copy keyboard keymap
+      #   run: sudo cp -rp keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }} qmk_firmware/keyboards/${{ matrix.keyboard }}/keymaps
 
-      - name: Compile firmware
-        run: cd qmk_firmware && make ${{ matrix.keyboard }}:${{ matrix.keymap }}
+      # - name: Compile firmware
+      #   run: cd qmk_firmware && make ${{ matrix.keyboard }}:${{ matrix.keymap }}
 
-      - name: Upload compiled firmware (build artifact)
-        uses: actions/upload-artifact@v3
+      # - name: Upload compiled firmware (build artifact)
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: firmware
+      #     path: |
+      #       qmk_firmware/*.bin
+      #       qmk_firmware/*.hex
+      - name: QMK Keyboard firmware build (extended)
+        uses: Soryyyn/qmk-build@v1.2
+        with:
+          keymap-path: keyboards/${{ matrix.keyboard }}/keymaps/${{ matrix.keymap }}
+          keyboard: ${{ matrix.keyboard }}
+          keymap: ${{ matrix.keymap }}
+      - name: Upload a Firmware
+        uses: actions/upload-artifact@v3.1.2
         with:
           name: firmware
-          path: |
-            qmk_firmware/*.bin
-            qmk_firmware/*.hex
+          path: build
+  
   publish:
     runs-on: ubuntu-latest
     needs:

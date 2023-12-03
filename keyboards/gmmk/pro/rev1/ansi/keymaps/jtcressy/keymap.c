@@ -43,12 +43,12 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______,  _______, _______,                            _______,                            _______, _______,  _______, RGB_SPD, RGB_RMOD, RGB_SPI
   ),
 	[2] = LAYOUT(
-    _______, _______, _______, _______, _______,    _______,    _______,      _______, _______, _______, _______, _______, _______, _______,             _______,
-    _______, _______, _______, _______, _______,    _______,    _______,      _______, _______, _______, _______, _______, _______, _______,             _______,
-    _______, KC_PGUP, KC_HOME,   KC_UP, KC_END,     _______,    _______,      _______, _______, _______, KC_MPLY, KC_MPRV, KC_MNXT, _______,             _______,
-    _______, KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT,    _______,    KC_LEFT,      KC_DOWN,   KC_UP, KC_RGHT, _______, _______,          _______,             _______,
-    _______,          _______, _______, LGUI(KC_C), LGUI(KC_V), _______,      _______, _______, _______, _______, _______,          HYPR(KC_I), _______, _______,
-    _______, _______, _______,                                  LGUI(KC_SPC),                            _______, _______, _______, _______,    _______, _______
+    _______, _______, _______, _______, _______,    _______,    _______,      _______, _______, _______, _______, _______,    _______,    _______,             _______,
+    _______, _______, _______, _______, _______,    _______,    _______,      _______, _______, _______, _______, _______,    _______,    _______,             _______,
+    _______, KC_PGUP, KC_HOME,   KC_UP, KC_END,     _______,    _______,      KC_BTN1, KC_BTN2, KC_BTN3, KC_MPLY, KC_MPRV,    KC_MNXT,    _______,             _______,
+    _______, KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT,    _______,    KC_MS_L,      KC_MS_D, KC_MS_U, KC_MS_R, _______, _______,                _______,             _______,
+    _______,          _______, _______, LGUI(KC_C), LGUI(KC_V), _______,      _______, KC_MUTE, KC_VOLD, KC_VOLU, _______,             HYPR(KC_I),   _______,  _______,
+    _______, _______, _______,                             LGUI(KC_SPC),                                 _______, _______, HYPR(KC_I),    _______,   _______,  _______
   ),
   // This is an alternative togglable layer to change default function row to standard F keys
   [3] = LAYOUT(
@@ -60,6 +60,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______, _______, _______,                               _______,                            _______, _______, _______, _______, _______, _______
   ),
 };
+
+#if defined(ENCODER_MAP_ENABLE)
+const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
+    [0] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [1] = { ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+    [2] = { ENCODER_CCW_CW(KC_WH_U, KC_WH_D) },
+    [3] = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+};
+#endif
 // clang-format on
 
 #ifdef ENCODER_ENABLE
@@ -333,7 +342,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   }
 
 
-  void rgb_matrix_indicators_user() {
+  bool rgb_matrix_indicators_user(void) {
     #if RGB_CONFIRMATION_BLINKING_TIME > 0
     if (effect_started_time > 0) {
       /* Render blinking EFFECTS */
@@ -347,7 +356,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         if (host_keyboard_led_state().caps_lock) {
           set_rgb_caps_leds();
         }
-        return;
+        return false;
       } else {
         /* EFFECTS duration is finished */
         effect_started_time = 0;
@@ -371,6 +380,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     if (host_keyboard_led_state().caps_lock) {
       set_rgb_caps_leds();
     }
+    return false;
   }
 
   #if RGB_CONFIRMATION_BLINKING_TIME > 0

@@ -2,28 +2,25 @@ SHELL := /usr/bin/env bash
 
 QMK_DIR := qmk_firmware
 
-clone-qmk: 
-	qmk clone qmk/qmk_firmware $(QMK_DIR)
+qmk-clone: $(QMK_DIR)/.git/HEAD
+$(QMK_DIR)/.git/HEAD:
+	git clone https://github.com/qmk/qmk_firmware $(QMK_DIR)
 
-qmk-deps:
+qmk-deps: qmk-clone $(QMK_DIR)/.qmk-installed
+$(QMK_DIR)/.qmk-installed:
 	pushd $(QMK_DIR) && \
 	./util/qmk_install.sh && \
 	python3 -m pip install qmk && \
+	echo "true" > .qmk-installed && \
 	popd
 
-fix-gcc-ubuntu:
+fix-gcc-ubuntu: /usr/share/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi-gcc
+/usr/share/gcc-arm-none-eabi-10-2020-q4-major/bin/arm-none-eabi-gcc:
 	sudo bash .github/scripts/update-gcc10-ubuntu.sh
 
-qmk-submodules:
+qmk-submodules: qmk-clone
 	pushd $(QMK_DIR) && \
 	make git-submodule && \
 	popd
 
-qmk-cli:
-	curl -s https://linux.qmk.fm/gpg_pubkey.txt | sudo apt-key add -
-	sudo add-apt-repository 'deb https://linux.qmk.fm/ focal main'
-	sudo apt update -yqq
-	sudo apt install -yqq qmk
-
-deps: fix-gcc-ubuntu qmk-cli clone-qmk qmk-deps
-
+deps: fix-gcc-ubuntu qmk-clone qmk-deps
